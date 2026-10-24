@@ -53,11 +53,15 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
 
-      # stackq is public, so no token is needed to fetch the action. Pin to a
-      # tag once there is one.
-      - uses: shresthaujjwal/stackq@main
+      # The binary version is pinned in .stackq-version, which the bump-stackq
+      # workflow updates by PR after every stackq release.
+      - id: stackq
+        run: echo "version=$(tr -d '[:space:]' < .stackq-version 2>/dev/null || echo latest)" >> "$GITHUB_OUTPUT"
+
+      - uses: shresthaujjwal/stackq@v0
         with:
           token: ${{ github.token }}
+          version: ${{ steps.stackq.outputs.version }}
 
       - name: Start CI on stack branches
         env:
