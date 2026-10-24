@@ -20,7 +20,7 @@ on:
       command:
         description: What to do
         type: choice
-        options: [land, after-merge, revert, schedule]
+        options: [land, after-merge, revert, schedule, tick]
         default: land
       pr:
         description: PR number (not needed for schedule)
