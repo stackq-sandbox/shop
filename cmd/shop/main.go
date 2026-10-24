@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/stackq-sandbox/shop/internal/cart"
-	"github.com/stackq-sandbox/shop/internal/util"
+	"github.com/stackq-sandbox/shop/internal/money"
 )
 
 func routes() *http.ServeMux {
@@ -18,7 +18,7 @@ func routes() *http.ServeMux {
 		var c cart.Cart
 		c.Add("sku-1", 2, 1999)
 		c.Add("sku-2", 1, 499)
-		fmt.Fprintln(w, util.Format(c.Total()))
+		fmt.Fprintln(w, money.Format(c.Total()))
 	})
 	return mux
 }

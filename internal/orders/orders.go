@@ -2,7 +2,7 @@ package orders
 
 import (
 	"github.com/stackq-sandbox/shop/internal/cart"
-	"github.com/stackq-sandbox/shop/internal/util"
+	"github.com/stackq-sandbox/shop/internal/money"
 )
 
 type Order struct {
@@ -11,5 +11,5 @@ type Order struct {
 }
 
 func (o Order) Summary() string {
-	return o.ID + ": " + util.Format(o.Cart.Total())
+	return o.ID + ": " + money.Format(o.Cart.Total())
 }
