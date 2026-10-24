@@ -1,0 +1,3 @@
+env: prod
+flags:
+  legacy_banner: false

@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  # No branch filter: stack parts target stack/** branches.
+  pull_request:
+  # The merge queue runs this workflow on its temporary branches.
+  merge_group:
+  # Lets the stackq workflow start CI on branches it pushed with GITHUB_TOKEN
+  # (pushes made with GITHUB_TOKEN do not trigger pull_request runs).
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: gofmt -l . | tee /dev/stderr | (! read)
+      - run: go vet ./...
+      - run: go test -race ./...

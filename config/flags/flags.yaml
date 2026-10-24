@@ -1,0 +1,4 @@
+flags:
+  legacy_banner:
+    description: Show the legacy promo banner.
+    default: false

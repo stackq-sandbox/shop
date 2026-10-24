@@ -1,0 +1,24 @@
+{
+  "trunk": "main",
+  "prefix": "stack/{name}/",
+  "maxLines": 400,
+  "check": "go build ./... && go vet ./...",
+  "landing": "atomic",
+  "minApprovals": 1,
+  "closeSource": true,
+  "flags": {
+    "paths": ["internal/flags/", "config/flags/*.yaml"],
+    "activation": ["config/env/prod/*.yaml"],
+    "guards": ["flags.Enabled"],
+    "entrypoints": ["HandleFunc", "Handle"],
+    "enforce": false
+  },
+  "priority": {
+    "enabled": true,
+    "maxInFlight": 3
+  },
+  "slices": [
+    { "name": "proto", "paths": ["proto/", "*.proto"] },
+    { "name": "migrations", "paths": ["/db/migrations/"] }
+  ]
+}

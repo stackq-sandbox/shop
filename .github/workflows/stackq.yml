@@ -1,0 +1,69 @@
+# stackq with no PAT and no GitHub App: everything runs on the built-in
+# GITHUB_TOKEN. Known consequence: pushes made with GITHUB_TOKEN do not trigger
+# pull_request workflows, so the last step dispatches CI on stack branches
+# explicitly (ci.yml has workflow_dispatch). Check runs from a dispatched run
+# attach to the branch head commit, so they satisfy the PR's required check.
+name: stackq
+
+on:
+  pull_request:
+    types: [closed, dequeued, labeled]
+  pull_request_review:
+    types: [submitted]
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      command:
+        description: What to do
+        type: choice
+        options: [land, after-merge, revert, schedule]
+        default: land
+      pr:
+        description: PR number (not needed for schedule)
+        required: false
+        default: "0"
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: stackq
+  cancel-in-progress: false
+
+jobs:
+  stackq:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'pull_request_review' ||
+      github.event_name == 'workflow_run' ||
+      (github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'stackq:queue') ||
+      (github.event_name == 'pull_request' && github.event.action != 'labeled' &&
+       (github.event.action == 'dequeued' || github.event.pull_request.merged == true))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      # Vendored copy of stackq (see tools/stackq): a different owner's private
+      # repository cannot be used as an action without a token that can read it.
+      - uses: ./tools/stackq
+        with:
+          token: ${{ github.token }}
+
+      - name: Start CI on stack branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr list --state open --json headRefName --jq '.[].headRefName | select(startswith("stack/"))' |
+          while read -r branch; do
+            gh workflow run ci.yml --ref "$branch" || true
+          done
