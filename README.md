@@ -8,5 +8,5 @@ build, vet and test, and so a large branch (`feature/new-checkout`) has a
 believable shape to split.
 
 No personal access token is used. The `stackq` workflow runs with the built-in
-`GITHUB_TOKEN`, and stackq itself is vendored under `tools/stackq` so the
-workflow does not need to fetch another (private) repository.
+`GITHUB_TOKEN`, and the action is fetched from the public
+`shresthaujjwal/stackq` repository.
