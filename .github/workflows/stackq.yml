@@ -53,9 +53,9 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
 
-      # Vendored copy of stackq (see tools/stackq): a different owner's private
-      # repository cannot be used as an action without a token that can read it.
-      - uses: ./tools/stackq
+      # stackq is public, so no token is needed to fetch the action. Pin to a
+      # tag once there is one.
+      - uses: shresthaujjwal/stackq@main
         with:
           token: ${{ github.token }}
 
