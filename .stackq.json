@@ -7,10 +7,20 @@
   "minApprovals": 1,
   "closeSource": true,
   "flags": {
-    "paths": ["internal/flags/", "config/flags/*.yaml"],
-    "activation": ["config/env/prod/*.yaml"],
-    "guards": ["flags.Enabled"],
-    "entrypoints": ["HandleFunc", "Handle"],
+    "paths": [
+      "internal/flags/",
+      "config/flags/*.yaml"
+    ],
+    "activation": [
+      "config/env/prod/*.yaml"
+    ],
+    "guards": [
+      "flags.Enabled"
+    ],
+    "entrypoints": [
+      "HandleFunc",
+      "Handle"
+    ],
     "enforce": false
   },
   "priority": {
@@ -18,7 +28,26 @@
     "maxInFlight": 3
   },
   "slices": [
-    { "name": "proto", "paths": ["proto/", "*.proto"] },
-    { "name": "migrations", "paths": ["/db/migrations/"] }
+    {
+      "name": "proto",
+      "paths": [
+        "proto/",
+        "*.proto"
+      ]
+    },
+    {
+      "name": "migrations",
+      "paths": [
+        "/db/migrations/"
+      ]
+    },
+    {
+      "name": "cart-money-wiring",
+      "paths": [
+        "/cmd/shop/",
+        "/internal/cart/",
+        "/internal/orders/"
+      ]
+    }
   ]
 }
