@@ -50,5 +50,6 @@
       ]
     }
   ],
-  "autoLand": true
+  "autoLand": true,
+  "allowUnreviewed": true
 }
