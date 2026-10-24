@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package shop.checkout.v1;
+
+message Address {
+  string line1 = 1;
+  string line2 = 2;
+  string city = 3;
+  string region = 4;
+  string postal = 5;
+  string country = 6;
+}
+
+message OrderLine {
+  string sku = 1;
+  int32 qty = 2;
+  int64 unit_cents = 3;
+}
+
+message Quote {
+  int64 subtotal_cents = 1;
+  int64 discount_cents = 2;
+  int64 tax_cents = 3;
+  int64 shipping_cents = 4;
+  int64 total_cents = 5;
+}
+
+message Receipt {
+  string id = 1;
+  string provider = 2;
+  int64 amount_cents = 3;
+}
+
+message Carrier {
+  string key = 1;
+  string name = 2;
+  int64 base_cents = 3;
+  int64 per_kg_cents = 4;
+  int32 transit_days = 5;
+}
+
+message TaxRate {
+  string region = 1;
+  string name = 2;
+  int32 bps = 3;
+}
+
+message RefundRequest {
+  string charge_id = 1;
+  int64 amount_cents = 2;
+  string reason = 3;
+}
+
+message RefundResponse {
+  string charge_id = 1;
+  int64 refunded_cents = 2;
+  int64 remaining_cents = 3;
+}
+
+message PlaceOrderRequest {
+  string id = 1;
+  repeated OrderLine lines = 2;
+  Address ship = 3;
+  string coupon = 4;
+  string payment = 5;
+}
+
+message PlaceOrderResponse {
+  Quote quote = 1;
+  Receipt receipt = 2;
+}
+
+message QuoteRequest {
+  repeated OrderLine lines = 1;
+  Address ship = 2;
+  string coupon = 3;
+}
+
+service Checkout {
+  rpc Quote(QuoteRequest) returns (Quote);
+  rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse);
+  rpc Refund(RefundRequest) returns (RefundResponse);
+  rpc ListCarriers(QuoteRequest) returns (stream Carrier);
+  rpc ListTaxRates(QuoteRequest) returns (stream TaxRate);
+}
