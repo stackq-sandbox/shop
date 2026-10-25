@@ -51,5 +51,6 @@
     }
   ],
   "autoLand": true,
-  "allowUnreviewed": true
+  "allowUnreviewed": true,
+  "queueCI": "ci.yml"
 }
