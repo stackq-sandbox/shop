@@ -26,3 +26,7 @@ flags:
     description: Let customers add a gift note to an order.
     default: false
     owner: growth
+  reviews:
+    description: Earn reviews points on orders and expose /reviews/list.
+    default: false
+    owner: growth
