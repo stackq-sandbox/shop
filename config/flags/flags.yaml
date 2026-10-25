@@ -22,3 +22,7 @@ flags:
     description: Let customers save items for later.
     default: false
     owner: growth
+  giftnote:
+    description: Let customers add a gift note to an order.
+    default: false
+    owner: growth
