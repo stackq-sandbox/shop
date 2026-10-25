@@ -1,0 +1,4 @@
+# Changes to these paths need the owner's review once "Require review from Code
+# Owners" is switched on in the branch rules. Until then this file does nothing.
+/.github/        @shresthaujjwal
+/.stackq.json    @shresthaujjwal
