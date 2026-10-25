@@ -49,5 +49,7 @@
         "/internal/orders/"
       ]
     }
-  ]
+  ],
+  "autoLand": true,
+  "allowUnreviewed": true
 }

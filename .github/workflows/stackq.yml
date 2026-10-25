@@ -1,37 +1,43 @@
-# stackq with no PAT and no GitHub App: everything runs on the built-in
-# GITHUB_TOKEN. Known consequence: pushes made with GITHUB_TOKEN do not trigger
-# pull_request workflows, so the last step dispatches CI on stack branches
-# explicitly (ci.yml has workflow_dispatch). Check runs from a dispatched run
-# attach to the branch head commit, so they satisfy the PR's required check.
+# Copy to .github/workflows/stackq.yml in the repository that uses stacks.
+# Your CI (examples/ci-merge-group.yml) needs merge_group and workflow_dispatch.
+#
+# Token: add a STACKQ_TOKEN secret (fine-grained PAT, or a GitHub App token you
+# mint with actions/create-github-app-token) at the repo or org level. Pushes
+# made with it trigger your CI, and an App can jump the queue. Without one
+# this uses the built-in token, and the last step starts CI on stack branches.
 name: stackq
 
 on:
   pull_request:
+    # closed+merged: restack / finish an atomic landing, then refill the queue
+    # dequeued:      the queue kicked a PR out; pause it and say why
+    # labeled:       a PR joined the priority pool (stackq:queue)
     types: [closed, dequeued, labeled]
   pull_request_review:
-    types: [submitted]
+    types: [submitted] # an approval can make a pool PR or a whole stack ready
   workflow_run:
-    workflows: [ci]
+    workflows: [ci] # the name of your CI workflow: a green run can make a pool PR or a stack ready
     types: [completed]
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/5 * * * *" # safety net for missed events; drop it if you use neither priority nor autoLand
   workflow_dispatch:
     inputs:
       command:
         description: What to do
         type: choice
-        options: [land, after-merge, revert, schedule]
+        options: [land, after-merge, revert, schedule, tick]
         default: land
       pr:
-        description: PR number (not needed for schedule)
+        description: PR number (not needed for schedule or tick)
         required: false
         default: "0"
 
 permissions:
   contents: write
   pull-requests: write
-  actions: write
+  actions: write # to start CI on stack branches
 
+# One stack step at a time, never cancelled halfway through a push.
 concurrency:
   group: stackq
   cancel-in-progress: false
@@ -47,23 +53,33 @@ jobs:
       (github.event_name == 'pull_request' && github.event.action != 'labeled' &&
        (github.event.action == 'dequeued' || github.event.pull_request.merged == true))
     runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.STACKQ_TOKEN || github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
-          fetch-depth: 0
+          fetch-depth: 0 # rebasing needs history; on huge repos add `filter: blob:none`
+          token: ${{ env.TOKEN }}
 
-      # stackq is public, so no token is needed to fetch the action. Pin to a
-      # tag once there is one.
-      - uses: shresthaujjwal/stackq@main
+      # Runs the newest stackq release. To pin one, add `version: v0.1.1`
+      # (or use `@v0.1.1`); the release notes list what changed.
+      - uses: shresthaujjwal/stackq@v0
         with:
-          token: ${{ github.token }}
+          token: ${{ env.TOKEN }}
 
+      # Pushes made with the built-in token do not start pull_request
+      # workflows. Start CI on any stack branch whose current commit has no run.
+      # Harmless when a PAT or an App token is used.
       - name: Start CI on stack branches
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ env.TOKEN }}
         run: |
-          gh pr list --state open --json headRefName --jq '.[].headRefName | select(startswith("stack/"))' |
-          while read -r branch; do
-            gh workflow run ci.yml --ref "$branch" || true
+          gh pr list --state open --json headRefName,headRefOid \
+            --jq '.[] | select(.headRefName | startswith("stack/")) | "\(.headRefName) \(.headRefOid)"' |
+          while read -r branch sha; do
+            seen=$(gh run list --workflow ci.yml --branch "$branch" --json headSha --jq ".[] | select(.headSha == \"$sha\") | .headSha" | head -n1)
+            if [ -z "$seen" ]; then
+              gh workflow run ci.yml --ref "$branch" || true
+            fi
           done
