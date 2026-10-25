@@ -14,3 +14,7 @@ flags:
     description: Earn loyalty points on orders and expose /loyalty/tiers.
     default: false
     owner: growth
+  coupons:
+    description: Earn coupons points on orders and expose /coupons/list.
+    default: false
+    owner: marketing
