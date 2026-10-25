@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package shop.refunds.v1;
+
+enum Tier {
+  TIER_UNSPECIFIED = 0;
+  BRONZE = 1;
+  SILVER = 2;
+  GOLD = 3;
+  PLATINUM = 4;
+}
+
+message Account {
+  string customer_id = 1;
+  Tier tier = 2;
+  int64 points = 3;
+  int64 lifetime_cents = 4;
+}
+
+message Entry {
+  string id = 1;
+  string customer_id = 2;
+  string order_id = 3;
+  int64 delta = 4;
+  string reason = 5;
+}
+
+message EarnRequest {
+  string customer_id = 1;
+  string order_id = 2;
+  int64 order_cents = 3;
+}
+
+message EarnResponse {
+  Account account = 1;
+  Entry entry = 2;
+}
+
+service Refunds {
+  rpc Earn(EarnRequest) returns (EarnResponse);
+}
