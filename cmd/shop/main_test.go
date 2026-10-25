@@ -48,3 +48,18 @@ func TestInventoryWarehousesIsFlagged(t *testing.T) {
 		t.Fatalf("want 8 warehouses, got %d (%v)", len(rows), err)
 	}
 }
+
+func TestLoyaltyTiersIsFlagged(t *testing.T) {
+	if rec := get("/loyalty/tiers"); rec.Code != http.StatusNotFound {
+		t.Fatalf("flag off: status = %d, want 404", rec.Code)
+	}
+	t.Setenv("SHOP_FLAG_LOYALTY", "true")
+	rec := get("/loyalty/tiers")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("flag on: status = %d", rec.Code)
+	}
+	var rows []map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &rows); err != nil || len(rows) != 4 {
+		t.Fatalf("rows = %v, err = %v", rows, err)
+	}
+}

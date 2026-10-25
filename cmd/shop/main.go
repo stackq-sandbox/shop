@@ -28,6 +28,9 @@ func routes() *http.ServeMux {
 	if flags.Enabled(flags.Inventory) {
 		mux.HandleFunc("/inventory/warehouses", warehousesHandler)
 	}
+	if flags.Enabled(flags.Loyalty) {
+		mux.HandleFunc("/loyalty/tiers", tiersHandler)
+	}
 	// Quote-only endpoint. Deliberately not behind the flag so the stackq
 	// guard lint has an unguarded entrypoint to report.
 	mux.HandleFunc("/checkout/preview", checkout.PreviewHandler)
