@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -30,5 +31,20 @@ func TestCheckoutV2IsFlagged(t *testing.T) {
 	t.Setenv("SHOP_FLAG_NEW_CHECKOUT", "true")
 	if rec := get("/checkout/v2"); rec.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("flag on: status = %d, want 405 for GET", rec.Code)
+	}
+}
+
+func TestInventoryWarehousesIsFlagged(t *testing.T) {
+	if rec := get("/inventory/warehouses"); rec.Code != http.StatusNotFound {
+		t.Fatalf("flag off: status = %d, want 404", rec.Code)
+	}
+	t.Setenv("SHOP_FLAG_INVENTORY", "true")
+	rec := get("/inventory/warehouses")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("flag on: status = %d", rec.Code)
+	}
+	var rows []map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &rows); err != nil || len(rows) != 8 {
+		t.Fatalf("want 8 warehouses, got %d (%v)", len(rows), err)
 	}
 }
