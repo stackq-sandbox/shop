@@ -18,3 +18,7 @@ flags:
     description: Earn coupons points on orders and expose /coupons/list.
     default: false
     owner: marketing
+  wishlist:
+    description: Let customers save items for later.
+    default: false
+    owner: growth
