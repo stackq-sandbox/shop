@@ -7,8 +7,15 @@ import (
 	"strings"
 )
 
+// Flag names.
+const (
+	LegacyBanner = "legacy_banner"
+	NewCheckout  = "new_checkout"
+)
+
 var defaults = map[string]bool{
-	"legacy_banner": false,
+	LegacyBanner: false,
+	NewCheckout:  false,
 }
 
 // Enabled reports whether the named flag is on.
