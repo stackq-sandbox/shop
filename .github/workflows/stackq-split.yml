@@ -71,17 +71,12 @@ jobs:
           fetch-depth: 0 # the planner needs the merge base and history
           token: ${{ env.TOKEN }}
 
-      # The binary version is pinned on main in .stackq-version (kept current
-      # by the bump-stackq workflow), whatever branch is being split.
-      - id: stackq
-        run: echo "version=$(git show origin/main:.stackq-version 2>/dev/null | tr -d '[:space:]' || true)" >> "$GITHUB_OUTPUT"
-
+      # Runs the newest stackq release; add `version: v0.1.1` to pin one.
       # The slice build check comes from "check" in .stackq.json.
       - name: Split
         uses: shresthaujjwal/stackq@v0
         with:
           token: ${{ env.TOKEN }}
-          version: ${{ steps.stackq.outputs.version || 'latest' }}
           command: split
           args: --max-lines ${{ inputs.max_lines || '400' }} --from-pr ${{ env.SOURCE_PR }} ${{ inputs.force && '--force' || '' }}
 
@@ -89,19 +84,23 @@ jobs:
         uses: shresthaujjwal/stackq@v0
         with:
           token: ${{ env.TOKEN }}
-          version: ${{ steps.stackq.outputs.version || 'latest' }}
           command: push
           args: --from-pr ${{ env.SOURCE_PR }} ${{ inputs.draft && '--draft' || '' }} ${{ (github.event_name == 'pull_request' || inputs.close_source) && '--close-source' || '' }}
 
       # Pushes made with the built-in token do not start pull_request
-      # workflows. Harmless when a PAT or App token is used.
+      # workflows. Start CI on any stack branch whose current commit has no run.
+      # Harmless when a PAT or an App token is used.
       - name: Start CI on the stack branches
         env:
           GH_TOKEN: ${{ env.TOKEN }}
         run: |
-          gh pr list --state open --json headRefName --jq '.[].headRefName | select(startswith("stack/"))' |
-          while read -r branch; do
-            gh workflow run ci.yml --ref "$branch" || true
+          gh pr list --state open --json headRefName,headRefOid \
+            --jq '.[] | select(.headRefName | startswith("stack/")) | "\(.headRefName) \(.headRefOid)"' |
+          while read -r branch sha; do
+            seen=$(gh run list --workflow ci.yml --branch "$branch" --json headSha --jq ".[] | select(.headSha == \"$sha\") | .headSha" | head -n1)
+            if [ -z "$seen" ]; then
+              gh workflow run ci.yml --ref "$branch" || true
+            fi
           done
 
       # Take the label off so applying it again retries.

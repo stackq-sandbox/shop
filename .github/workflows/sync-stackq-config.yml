@@ -1,0 +1,41 @@
+# These workflows are copies of stackq's examples, apart from the organization
+# name. Compare them with the examples of the newest stackq release so a change
+# there is not silently missed here. Fails with a diff when they differ.
+#
+# To fix a failure, copy the example over the file and replace YOUR_ORG with
+# shresthaujjwal (a bot cannot do it for you: the built-in GITHUB_TOKEN may not
+# push changes to workflow files).
+name: sync check
+
+on:
+  pull_request:
+    paths: [".github/workflows/**"]
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare with stackq's examples
+        run: |
+          set -euo pipefail
+          base=https://raw.githubusercontent.com/shresthaujjwal/stackq/v0/examples
+          status=0
+          for pair in stackq.yml:stackq.yml stackq-split.yml:stackq-split.yml ci-merge-group.yml:ci.yml; do
+            example=${pair%%:*}
+            local_file=.github/workflows/${pair##*:}
+            curl -fsSL "$base/$example" | sed 's#YOUR_ORG/stackq@v0#shresthaujjwal/stackq@v0#' > "$RUNNER_TEMP/$example"
+            if diff -u "$RUNNER_TEMP/$example" "$local_file"; then
+              echo "ok: $local_file matches examples/$example"
+            else
+              echo "::error file=$local_file::out of sync with stackq examples/$example"
+              status=1
+            fi
+          done
+          exit $status

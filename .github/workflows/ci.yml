@@ -1,12 +1,17 @@
+# Your CI needs three triggers for stackq. Replace the steps with your build
+# and tests.
 name: ci
 
 on:
-  # No branch filter: stack parts target stack/** branches.
+  # No branch filter: stack parts target stack/** branches, and atomic
+  # landing needs their checks. (Or use branches: [main, 'stack/**'].)
   pull_request:
-  # The merge queue runs this workflow on its temporary branches.
+  # The merge queue runs this workflow on its temporary branches; without it
+  # queued PRs are never checked and the queue stalls.
   merge_group:
-  # Lets the stackq workflow start CI on branches it pushed with GITHUB_TOKEN
-  # (pushes made with GITHUB_TOKEN do not trigger pull_request runs).
+  # Lets the stackq workflows start CI on branches they pushed with the
+  # built-in token (pushes made with GITHUB_TOKEN do not trigger pull_request
+  # runs). Not needed if you give stackq a PAT or an App token.
   workflow_dispatch:
 
 jobs:
