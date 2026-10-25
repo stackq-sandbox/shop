@@ -23,14 +23,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Compare with stackq's examples
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          base=https://raw.githubusercontent.com/shresthaujjwal/stackq/v0/examples
+          # Read the files through the API. raw.githubusercontent.com caches for
+          # five minutes, so right after a release moves v0 it serves the old
+          # example and the check reports a difference that is not there.
+          api=https://api.github.com/repos/shresthaujjwal/stackq/contents/examples
           status=0
           for pair in stackq.yml:stackq.yml stackq-split.yml:stackq-split.yml ci-merge-group.yml:ci.yml; do
             example=${pair%%:*}
             local_file=.github/workflows/${pair##*:}
-            curl -fsSL "$base/$example" | sed 's#YOUR_ORG/stackq@v0#shresthaujjwal/stackq@v0#' > "$RUNNER_TEMP/$example"
+            curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github.raw+json" "$api/$example?ref=v0" |
+              sed 's#YOUR_ORG/stackq@v0#shresthaujjwal/stackq@v0#' > "$RUNNER_TEMP/$example"
             if diff -u "$RUNNER_TEMP/$example" "$local_file"; then
               echo "ok: $local_file matches examples/$example"
             else
