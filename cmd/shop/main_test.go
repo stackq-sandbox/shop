@@ -63,3 +63,18 @@ func TestLoyaltyTiersIsFlagged(t *testing.T) {
 		t.Fatalf("rows = %v, err = %v", rows, err)
 	}
 }
+
+func TestCouponsTiersIsFlagged(t *testing.T) {
+	if rec := get("/coupons/list"); rec.Code != http.StatusNotFound {
+		t.Fatalf("flag off: status = %d, want 404", rec.Code)
+	}
+	t.Setenv("SHOP_FLAG_COUPONS", "true")
+	rec := get("/coupons/list")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("flag on: status = %d", rec.Code)
+	}
+	var rows []map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &rows); err != nil || len(rows) != 4 {
+		t.Fatalf("rows = %v, err = %v", rows, err)
+	}
+}
