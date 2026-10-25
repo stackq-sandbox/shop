@@ -11,11 +11,13 @@ import (
 const (
 	LegacyBanner = "legacy_banner"
 	NewCheckout  = "new_checkout"
+	Inventory    = "inventory"
 )
 
 var defaults = map[string]bool{
 	LegacyBanner: false,
 	NewCheckout:  false,
+	Inventory:    false,
 }
 
 // Enabled reports whether the named flag is on.
