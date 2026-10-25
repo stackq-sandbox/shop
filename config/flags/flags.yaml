@@ -10,3 +10,7 @@ flags:
     description: Reserve stock per warehouse for orders and expose /inventory/warehouses.
     default: false
     owner: fulfilment
+  loyalty:
+    description: Earn loyalty points on orders and expose /loyalty/tiers.
+    default: false
+    owner: growth
