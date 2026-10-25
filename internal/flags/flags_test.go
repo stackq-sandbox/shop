@@ -17,3 +17,13 @@ func TestNewCheckoutDefaultsOff(t *testing.T) {
 		t.Fatal("new_checkout must default to off")
 	}
 }
+
+func TestInventoryDefaultsOff(t *testing.T) {
+	if Enabled(Inventory) {
+		t.Fatal("inventory must default to off")
+	}
+	t.Setenv("SHOP_FLAG_INVENTORY", "1")
+	if !Enabled(Inventory) {
+		t.Fatal("env override should turn the flag on")
+	}
+}

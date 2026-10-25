@@ -6,3 +6,7 @@ flags:
     description: Route /checkout/v2 to the rewritten checkout (tax, shipping, payments).
     default: false
     owner: payments
+  inventory:
+    description: Reserve stock per warehouse for orders and expose /inventory/warehouses.
+    default: false
+    owner: fulfilment
