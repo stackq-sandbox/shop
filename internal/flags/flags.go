@@ -12,6 +12,7 @@ const (
 	LegacyBanner = "legacy_banner"
 	NewCheckout  = "new_checkout"
 	Inventory    = "inventory"
+	Reviews      = "reviews"
 	Coupons      = "coupons"
 	Loyalty      = "loyalty"
 	Wishlist     = "wishlist"
@@ -22,6 +23,7 @@ var defaults = map[string]bool{
 	LegacyBanner: false,
 	NewCheckout:  false,
 	Inventory:    false,
+	Reviews:      false,
 	Coupons:      false,
 	Loyalty:      false,
 	Wishlist:     false,
