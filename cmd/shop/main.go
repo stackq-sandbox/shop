@@ -28,6 +28,9 @@ func routes() *http.ServeMux {
 	if flags.Enabled(flags.Inventory) {
 		mux.HandleFunc("/inventory/warehouses", warehousesHandler)
 	}
+	if flags.Enabled(flags.Coupons) {
+		mux.HandleFunc("/coupons/list", couponsHandler)
+	}
 	if flags.Enabled(flags.Loyalty) {
 		mux.HandleFunc("/loyalty/tiers", tiersHandler)
 	}
