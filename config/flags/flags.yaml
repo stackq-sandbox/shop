@@ -30,3 +30,7 @@ flags:
     description: Earn reviews points on orders and expose /reviews/list.
     default: false
     owner: growth
+  refunds:
+    description: Earn refunds points on orders and expose /refunds/list.
+    default: false
+    owner: growth
