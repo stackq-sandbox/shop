@@ -1,21 +1,21 @@
 package cart
 
 import (
-	"github.com/stackq-sandbox/shop/internal/checkout/discount"
-	"github.com/stackq-sandbox/shop/internal/money"
+	"github.com/stackq-sandbox/shop/internal/legacydiscount"
+	"github.com/stackq-sandbox/shop/internal/util"
 )
 
 type Item struct {
 	SKU   string
 	Qty   int
-	Price money.Cents
+	Price util.Cents
 }
 
 type Cart struct {
 	Items []Item
 }
 
-func (c *Cart) Add(sku string, qty int, price money.Cents) {
+func (c *Cart) Add(sku string, qty int, price util.Cents) {
 	for i := range c.Items {
 		if c.Items[i].SKU == sku {
 			c.Items[i].Qty += qty
@@ -33,14 +33,14 @@ func (c *Cart) Count() int {
 	return n
 }
 
-func (c *Cart) Subtotal() money.Cents {
-	var sum money.Cents
+func (c *Cart) Subtotal() util.Cents {
+	var sum util.Cents
 	for _, it := range c.Items {
-		sum += money.Cents(it.Qty) * it.Price
+		sum += util.Cents(it.Qty) * it.Price
 	}
 	return sum
 }
 
-func (c *Cart) Total() money.Cents {
-	return discount.Apply(c.Subtotal(), c.Count())
+func (c *Cart) Total() util.Cents {
+	return legacydiscount.Apply(c.Subtotal(), c.Count())
 }

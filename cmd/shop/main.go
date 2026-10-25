@@ -6,9 +6,7 @@ import (
 	"net/http"
 
 	"github.com/stackq-sandbox/shop/internal/cart"
-	"github.com/stackq-sandbox/shop/internal/checkout"
-	"github.com/stackq-sandbox/shop/internal/flags"
-	"github.com/stackq-sandbox/shop/internal/money"
+	"github.com/stackq-sandbox/shop/internal/util"
 )
 
 func routes() *http.ServeMux {
@@ -20,14 +18,8 @@ func routes() *http.ServeMux {
 		var c cart.Cart
 		c.Add("sku-1", 2, 1999)
 		c.Add("sku-2", 1, 499)
-		fmt.Fprintln(w, money.Format(c.Total()))
+		fmt.Fprintln(w, util.Format(c.Total()))
 	})
-	if flags.Enabled(flags.NewCheckout) {
-		mux.HandleFunc("/checkout/v2", checkout.Handler)
-	}
-	// Quote-only endpoint. Deliberately not behind the flag so the stackq
-	// guard lint has an unguarded entrypoint to report.
-	mux.HandleFunc("/checkout/preview", checkout.PreviewHandler)
 	return mux
 }
 
