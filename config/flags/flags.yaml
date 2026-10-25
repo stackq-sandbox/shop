@@ -2,7 +2,3 @@ flags:
   legacy_banner:
     description: Show the legacy promo banner.
     default: false
-  new_checkout:
-    description: Route /checkout/v2 to the rewritten checkout (tax, shipping, payments).
-    default: false
-    owner: payments
