@@ -1,0 +1,28 @@
+name: probe enqueue errors
+on:
+  pull_request:
+    types: [opened, synchronize]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  probe:
+    if: github.head_ref == 'probe-enqueue-errors'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      Q: 'mutation($id: ID!, $oid: GitObjectID) { enqueuePullRequest(input: {pullRequestId: $id, expectedHeadOid: $oid}) { mergeQueueEntry { position } } }'
+      A: 'mutation($id: ID!) { enablePullRequestAutoMerge(input: {pullRequestId: $id}) { pullRequest { number } } }'
+    steps:
+      - run: |
+          nid() { gh api repos/${{ github.repository }}/pulls/$1 --jq .node_id; }
+          probe() {
+            echo "=== $1"
+            echo "--- enqueue"; gh api graphql -f query="$Q" -f id="$2" ${3:+-f oid="$3"} 2>&1 | head -c 600; echo
+            echo "--- auto-merge"; gh api graphql -f query="$A" -f id="$2" 2>&1 | head -c 600; echo
+          }
+          probe "closed PR #96" "$(nid 96)"
+          probe "merged PR #95" "$(nid 95)"
+          probe "bad id" "PR_nope"
+          probe "this draft PR, stale head" "$(nid ${{ github.event.pull_request.number }})" "0000000000000000000000000000000000000000"
+          probe "this draft PR, right head" "$(nid ${{ github.event.pull_request.number }})" "${{ github.event.pull_request.head.sha }}"
