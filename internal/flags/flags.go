@@ -18,6 +18,7 @@ const (
 	Loyalty      = "loyalty"
 	Wishlist     = "wishlist"
 	GiftNote     = "giftnote"
+	Rates        = "rates"
 )
 
 var defaults = map[string]bool{
@@ -30,6 +31,7 @@ var defaults = map[string]bool{
 	Loyalty:      false,
 	Wishlist:     false,
 	GiftNote:     false,
+	Rates:        false,
 }
 
 // Enabled reports whether the named flag is on.
