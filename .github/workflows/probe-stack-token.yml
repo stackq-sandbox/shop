@@ -1,7 +1,7 @@
 name: probe stack token
 on:
   pull_request:
-    types: [109,110]
+    types: [opened, synchronize]
 permissions:
   contents: write
   pull-requests: write
@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
     steps:
       - run: |
-          echo "--- create stack [109,110],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"},{"message":"Validation Failed","errors":[109,110],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"}] with GITHUB_TOKEN"
-          echo '{"pull_requests":[109,110],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"},{"message":"Validation Failed","errors":[109,110],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"}]}' | gh api -X POST -H "X-GitHub-Api-Version: 2026-03-10" repos/${{ github.repository }}/stacks --input - 2>&1 | head -c 700; echo
-          echo "--- PR {"message":"Validation Failed","errors":[109,110],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"} stack"
-          gh api -H "X-GitHub-Api-Version: 2026-03-10" repos/${{ github.repository }}/pulls/{"message":"Validation Failed","errors":[109,110],"documentation_url":"https://docs.github.com/rest/pulls/110 --jq '.stack' 2>&1 | head -c 300; echo
+          echo "--- create stack [109,110] with GITHUB_TOKEN"
+          echo '{"pull_requests":[109,110]}' | gh api -X POST -H "X-GitHub-Api-Version: 2026-03-10" "repos/$REPO/stacks" --input - 2>&1 | head -c 700; echo
+          echo "--- PR 110 stack"
+          gh api -H "X-GitHub-Api-Version: 2026-03-10" "repos/$REPO/pulls/110" --jq '.stack' 2>&1 | head -c 300; echo
