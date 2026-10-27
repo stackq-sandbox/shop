@@ -1,0 +1,18 @@
+name: probe queue config
+on:
+  pull_request:
+    types: [opened, synchronize]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  probe:
+    if: github.head_ref == 'probe-queue-config'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - run: |
+          gh api graphql -f query='{ repository(owner:"stackq-sandbox", name:"shop") { mergeQueue(branch:"main") { configuration { checkResponseTimeout maximumEntriesToBuild maximumEntriesToMerge mergeMethod mergingStrategy minimumEntriesToMerge minimumEntriesToMergeWaitTime } } } }'
+          echo
+          gh api graphql -f query='{ repository(owner:"stackq-sandbox", name:"shop") { pullRequest(number:104) { number state baseRefName timelineItems(last:15) { nodes { __typename ... on RemovedFromMergeQueueEvent { createdAt reason } ... on AddedToMergeQueueEvent { createdAt } } } } } }'
