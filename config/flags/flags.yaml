@@ -34,3 +34,7 @@ flags:
     description: Earn refunds points on orders and expose /refunds/list.
     default: false
     owner: growth
+  rates:
+    description: Show shipping rates per carrier at /rates.
+    default: false
+    owner: fulfilment
