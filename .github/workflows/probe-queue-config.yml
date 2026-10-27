@@ -13,6 +13,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - run: |
-          gh api graphql -f query='{ repository(owner:"stackq-sandbox", name:"shop") { mergeQueue(branch:"main") { configuration { checkResponseTimeout maximumEntriesToBuild maximumEntriesToMerge mergeMethod mergingStrategy minimumEntriesToMerge minimumEntriesToMergeWaitTime } } } }'
-          echo
-          gh api graphql -f query='{ repository(owner:"stackq-sandbox", name:"shop") { pullRequest(number:104) { number state baseRefName timelineItems(last:15) { nodes { __typename ... on RemovedFromMergeQueueEvent { createdAt reason } ... on AddedToMergeQueueEvent { createdAt } } } } } }'
+          for n in 103 104; do
+            gh api graphql -f query="{ repository(owner:\"stackq-sandbox\", name:\"shop\") { pullRequest(number:$n) { number state timelineItems(last:20) { nodes { __typename ... on RemovedFromMergeQueueEvent { createdAt reason beforeCommit { oid } } ... on AddedToMergeQueueEvent { createdAt } ... on MergedEvent { createdAt } } } } } }" || true
+            echo
+          done
