@@ -1,0 +1,19 @@
+name: probe stack token
+on:
+  pull_request:
+    types: [opened, synchronize]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  probe:
+    if: github.head_ref == 'probe-stack-token'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - run: |
+          echo "--- create stack [{"message":"Validation Failed","errors":[{"resource":"PullRequest","code":"custom","message":"No commits between main and exp2/a"}],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"},{"message":"Validation Failed","errors":[{"resource":"PullRequest","code":"custom","message":"No commits between exp2/a and exp2/b"}],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"}] with GITHUB_TOKEN"
+          echo '{"pull_requests":[{"message":"Validation Failed","errors":[{"resource":"PullRequest","code":"custom","message":"No commits between main and exp2/a"}],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"},{"message":"Validation Failed","errors":[{"resource":"PullRequest","code":"custom","message":"No commits between exp2/a and exp2/b"}],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"}]}' | gh api -X POST -H "X-GitHub-Api-Version: 2026-03-10" repos/${{ github.repository }}/stacks --input - 2>&1 | head -c 700; echo
+          echo "--- PR {"message":"Validation Failed","errors":[{"resource":"PullRequest","code":"custom","message":"No commits between exp2/a and exp2/b"}],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"} stack"
+          gh api -H "X-GitHub-Api-Version: 2026-03-10" repos/${{ github.repository }}/pulls/{"message":"Validation Failed","errors":[{"resource":"PullRequest","code":"custom","message":"No commits between exp2/a and exp2/b"}],"documentation_url":"https://docs.github.com/rest/pulls/pulls#create-a-pull-request","status":"422"} --jq '.stack' 2>&1 | head -c 300; echo
